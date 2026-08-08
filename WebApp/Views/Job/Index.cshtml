@@ -1,7 +1,7 @@
 @model WebApp.Models.Job.JobListViewModel
 
 @{
-    ViewData["Title"] = "Danh sách việc làm";
+    ViewData["Title"] = "Danh sách việc làm - ARS Recruitment";
     var jobs = Model?.Jobs ?? new List<Services.DTOs.JobPosting.JobPostingListDto>();
 }
 
@@ -9,43 +9,58 @@
     public string FormatSalary(int? min, int? max)
     {
         if (min.HasValue && max.HasValue)
-            return $"{min.Value / 1000000} - {max.Value / 1000000} triệu";
+            return $"{min.Value / 1000000} - {max.Value / 1000000} Triệu";
         if (min.HasValue)
-            return $"Từ {min.Value / 1000000} triệu";
+            return $"Từ {min.Value / 1000000} Triệu";
         if (max.HasValue)
-            return $"Đến {max.Value / 1000000} triệu";
+            return $"Đến {max.Value / 1000000} Triệu";
         return "Thỏa thuận";
+    }
+
+    public string ExtractLogoSrc(object? logoPath)
+    {
+        if (logoPath == null) return "";
+        string str = logoPath.ToString() ?? "";
+        if (string.IsNullOrWhiteSpace(str)) return "";
+        if (str.Contains("src='"))
+        {
+            var parts = str.Split("src='");
+            if (parts.Length > 1) return parts[1].Split("'")[0];
+        }
+        if (str.Contains("src=\""))
+        {
+            var parts = str.Split("src=\"");
+            if (parts.Length > 1) return parts[1].Split("\"")[0];
+        }
+        return str;
     }
 }
 
-<!-- Page Header -->
-<div class="page-header bg-primary text-white py-5">
-    <div class="container py-4">
-        <h1 class="fw-bold display-5 mb-3">Danh sách việc làm</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="/" class="text-white-50 text-decoration-none">Trang chủ</a></li>
-                <li class="breadcrumb-item active text-white" aria-current="page">Việc làm</li>
-            </ol>
-        </nav>
+<!-- PAGE HEADER -->
+<div class="hero-wrapper py-5 text-white position-relative" style="min-height: auto; padding-top: 130px !important;">
+    <div class="hero-glow-1"></div>
+    <div class="container py-4 position-relative z-3">
+        <h1 class="fw-extrabold display-5 mb-2 text-white">Tìm Kiếm <span class="text-gradient">Việc Làm Phù Hợp</span></h1>
+        <p class="text-white-50 fs-5 mb-0">Hơn 12,500+ vị trí tuyển dụng hot nhất từ các doanh nghiệp hàng đầu</p>
     </div>
 </div>
 
-<div class="container py-5">
-    <!-- Filter Section -->
-    <div class="filter-card card border-0 shadow-sm mb-5 p-4 rounded-4" style="margin-top: -50px; position: relative; z-index: 10;">
+<div class="container py-5" style="margin-top: -30px; position: relative; z-index: 10;">
+    <!-- FILTER BAR -->
+    <div class="card border-0 shadow-lg p-4 rounded-4 bg-white mb-5">
         <form method="get" action="/Job">
-            <div class="row g-3">
+            <div class="row g-3 align-items-end">
                 <div class="col-lg-4 col-md-6">
-                    <label class="form-label fw-medium text-muted small">Từ khóa</label>
+                    <label class="form-label fw-bold text-dark small">Từ khóa tìm kiếm</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" name="keyword" value="@Model?.Keyword" class="form-control bg-light border-start-0 ps-0" placeholder="Tên công việc, công ty...">
+                        <span class="input-group-text bg-light border-end-0 text-primary"><i class="bi bi-search"></i></span>
+                        <input type="text" name="keyword" value="@Model?.Keyword" class="form-control bg-light border-start-0 ps-0 fw-medium" placeholder="Tên công việc, vị trí, công ty...">
                     </div>
                 </div>
+
                 <div class="col-lg-3 col-md-6">
-                    <label class="form-label fw-medium text-muted small">Ngành nghề</label>
-                    <select name="categoryId" class="form-select bg-light">
+                    <label class="form-label fw-bold text-dark small">Ngành nghề</label>
+                    <select name="categoryId" class="form-select bg-light fw-medium">
                         <option value="">Tất cả ngành nghề</option>
                         @if (Model?.Categories != null)
                         {
@@ -63,71 +78,104 @@
                         }
                     </select>
                 </div>
+
                 <div class="col-lg-2 col-md-4">
-                    <label class="form-label fw-medium text-muted small">Loại hình</label>
-                    <select name="jobType" class="form-select bg-light">
-                        <option value="">Tất cả</option>
+                    <label class="form-label fw-bold text-dark small">Loại hình</label>
+                    <select name="jobType" class="form-select bg-light fw-medium">
+                        <option value="">Tất cả loại hình</option>
                         <!option value="1" @(Model?.JobType?.ToString() == "FullTime" || Model?.JobType?.ToString() == "1" ? "selected" : "")>Toàn thời gian</!option>
                         <!option value="2" @(Model?.JobType?.ToString() == "PartTime" || Model?.JobType?.ToString() == "2" ? "selected" : "")>Bán thời gian</!option>
                         <!option value="3" @(Model?.JobType?.ToString() == "Internship" || Model?.JobType?.ToString() == "3" ? "selected" : "")>Thực tập</!option>
                         <!option value="4" @(Model?.JobType?.ToString() == "Contract" || Model?.JobType?.ToString() == "4" ? "selected" : "")>Hợp đồng</!option>
                     </select>
                 </div>
+
                 <div class="col-lg-2 col-md-4">
-                    <label class="form-label fw-medium text-muted small">Chế độ làm việc</label>
-                    <select name="workMode" class="form-select bg-light">
-                        <option value="">Tất cả</option>
+                    <label class="form-label fw-bold text-dark small">Chế độ làm việc</label>
+                    <select name="workMode" class="form-select bg-light fw-medium">
+                        <option value="">Tất cả chế độ</option>
                         <!option value="1" @(Model?.WorkMode?.ToString() == "Onsite" || Model?.WorkMode?.ToString() == "1" ? "selected" : "")>Tại văn phòng</!option>
                         <!option value="2" @(Model?.WorkMode?.ToString() == "Remote" || Model?.WorkMode?.ToString() == "2" ? "selected" : "")>Từ xa</!option>
                         <!option value="3" @(Model?.WorkMode?.ToString() == "Hybrid" || Model?.WorkMode?.ToString() == "3" ? "selected" : "")>Linh hoạt</!option>
                     </select>
                 </div>
-                <div class="col-lg-1 col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100 rounded-3 py-2"><i class="bi bi-funnel-fill"></i> Lọc</button>
+
+                <div class="col-lg-1 col-md-4">
+                    <button type="submit" class="btn btn-search-hero w-100 py-2.5 rounded-3 fw-bold fs-7">
+                        <i class="bi bi-funnel-fill me-1"></i> Lọc
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- Jobs Grid -->
+    <!-- RESULTS SUMMARY -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h5 class="fw-bold mb-0 text-dark">
+            Kết quả tìm kiếm (@jobs.Count việc làm)
+        </h5>
+        @if (!string.IsNullOrEmpty(Model?.Keyword) || Model?.CategoryId != null || Model?.JobType != null || Model?.WorkMode != null)
+        {
+            <a href="/Job" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-x-circle me-1"></i> Xóa bộ lọc
+            </a>
+        }
+    </div>
+
+    <!-- JOBS GRID -->
     <div class="row g-4">
         @if (jobs.Count > 0)
         {
             foreach (var job in jobs)
             {
                 <div class="col-lg-4 col-md-6">
-                    <div class="job-card card h-100 border-0 shadow-sm p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="company-logo bg-light text-primary fw-bold d-flex align-items-center justify-content-center rounded-circle me-3 flex-shrink-0">
-                                @(string.IsNullOrEmpty(job.CompanyLogoPath) ? job.CompanyName.Substring(0,1).ToUpper() : $"<img src='{job.CompanyLogoPath}' alt='logo' class='img-fluid rounded-circle'>")
+                    <div class="job-card">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            @{
+                                var logoUrl = ExtractLogoSrc(job.CompanyLogoPath);
+                            }
+                            <div class="company-logo-box">
+                                @if (!string.IsNullOrEmpty(logoUrl))
+                                {
+                                    <img src="@logoUrl" alt="@job.CompanyName">
+                                }
+                                else
+                                {
+                                    <span>@(string.IsNullOrEmpty(job.CompanyName) ? "J" : job.CompanyName.Substring(0, 1).ToUpper())</span>
+                                }
                             </div>
-                            <div>
-                                <h5 class="job-title text-dark fw-bold mb-1 text-truncate" style="max-width: 200px;" title="@job.Title">@job.Title</h5>
-                                <p class="company-name text-muted mb-0 small text-truncate" style="max-width: 200px;">@job.CompanyName</p>
+                            <div class="flex-grow-1 min-w-0">
+                                <a href="/Job/Detail/@job.Id" class="job-title-link text-truncate d-block" title="@job.Title">@job.Title</a>
+                                <div class="company-name-text text-truncate">@job.CompanyName</div>
                             </div>
                         </div>
-                        
-                        <div class="job-meta mb-3 text-muted small">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="bi bi-geo-alt me-2 text-primary"></i> @job.Location
+
+                        <div class="mb-3">
+                            <div class="salary-badge mb-3">
+                                <i class="bi bi-cash-stack fs-6"></i>
+                                <span>@FormatSalary(job.MinSalary, job.MaxSalary)</span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="bi bi-cash me-2 text-success"></i>
-                                <span class="text-success fw-bold">@FormatSalary(job.MinSalary, job.MaxSalary)</span>
+
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge-tag badge-purple">
+                                    <i class="bi bi-briefcase me-1"></i> @job.JobTypeName
+                                </span>
+                                <span class="badge-tag badge-cyan">
+                                    <i class="bi bi-laptop me-1"></i> @job.WorkModeName
+                                </span>
+                                <span class="badge-tag badge-orange">
+                                    <i class="bi bi-geo-alt me-1"></i> @job.Location
+                                </span>
                             </div>
                         </div>
-                        
-                        <div class="job-tags mb-3">
-                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-medium me-2 mb-2">@job.JobTypeName</span>
-                            <span class="badge bg-info-subtle text-info rounded-pill px-3 py-2 fw-medium mb-2">@job.WorkModeName</span>
-                        </div>
-                        
-                        <div class="text-muted small mb-4 d-flex align-items-center">
-                            <i class="bi bi-clock me-2"></i> Hạn nộp: @job.ExpiredAt.ToString("dd/MM/yyyy")
-                        </div>
-                        
-                        <div class="mt-auto">
-                            <a href="/Job/Detail/@job.Id" class="btn btn-outline-primary w-100 fw-medium rounded-pill hover-btn-primary btn-apply-hover">Xem chi tiết</a>
+
+                        <div class="mt-auto pt-3 border-top border-light-subtle d-flex align-items-center justify-content-between">
+                            <span class="text-muted extra-small" style="font-size:0.8rem;">
+                                <i class="bi bi-clock me-1"></i> Hạn nộp: @job.ExpiredAt.ToString("dd/MM/yyyy")
+                            </span>
+                            <a href="/Job/Detail/@job.Id" class="btn btn-detail-card btn-sm px-4">
+                                Xem chi tiết <i class="bi bi-chevron-right ms-1 small"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -136,13 +184,14 @@
         else
         {
             <div class="col-12 text-center py-5">
-                <div class="empty-state">
-                    <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
-                    <h3 class="mt-4 fw-bold">Không tìm thấy việc làm nào</h3>
-                    <p class="text-muted">Vui lòng thử lại với các tiêu chí tìm kiếm khác.</p>
-                    <a href="/Job" class="btn btn-primary rounded-pill px-4 mt-3">Xóa bộ lọc</a>
+                <div class="bg-white p-5 rounded-4 shadow-sm">
+                    <i class="bi bi-search text-muted" style="font-size: 3.5rem;"></i>
+                    <h4 class="mt-4 fw-bold text-dark">Không tìm thấy việc làm nào phù hợp</h4>
+                    <p class="text-muted mb-4">Thử mở rộng từ khóa hoặc chọn ngành nghề/chế độ làm việc khác.</p>
+                    <a href="/Job" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">Xem tất cả việc làm</a>
                 </div>
             </div>
         }
     </div>
 </div>
+

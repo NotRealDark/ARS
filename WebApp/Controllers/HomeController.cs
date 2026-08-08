@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WebApp.Models;
 using Services.Interfaces;
 using Infrastructure;
+using Domain.Enums;
 
 namespace WebApp.Controllers
 {
@@ -35,7 +36,15 @@ namespace WebApp.Controllers
             }
 
             ViewBag.LatestJobs = await _jobPostingService.GetLatestJobsAsync(6);
-            ViewBag.Categories = await _context.JobCategories.ToListAsync();
+            ViewBag.Categories = await _context.JobCategories
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Name,
+                    c.Description,
+                    JobCount = c.JobPostings.Count(j => j.Status == JobStatus.Active)
+                })
+                .ToListAsync();
 
             return View();
         }

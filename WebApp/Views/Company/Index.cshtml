@@ -3,6 +3,26 @@
     ViewData["Title"] = "Hồ sơ công ty";
 }
 
+@functions {
+    public string ExtractLogoSrc(object? logoPath)
+    {
+        if (logoPath == null) return "";
+        string str = logoPath.ToString() ?? "";
+        if (string.IsNullOrWhiteSpace(str)) return "";
+        if (str.Contains("src='"))
+        {
+            var parts = str.Split("src='");
+            if (parts.Length > 1) return parts[1].Split("'")[0];
+        }
+        if (str.Contains("src=\""))
+        {
+            var parts = str.Split("src=\"");
+            if (parts.Length > 1) return parts[1].Split("\"")[0];
+        }
+        return str;
+    }
+}
+
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold text-primary mb-0">Hồ sơ công ty</h3>
@@ -18,9 +38,12 @@
         <div class="card-body p-4">
             <div class="row">
                 <div class="col-md-3 text-center mb-3">
-                    @if (!string.IsNullOrWhiteSpace(Model.LogoPath))
+                    @{
+                        var logoUrl = ExtractLogoSrc(Model.LogoPath);
+                    }
+                    @if (!string.IsNullOrWhiteSpace(logoUrl))
                     {
-                        <img src="@Model.LogoPath" alt="Logo" class="img-fluid rounded border" style="max-height: 120px;" />
+                        <img src="@logoUrl" alt="Logo" class="img-fluid rounded border" style="max-height: 120px;" />
                     }
                     else
                     {

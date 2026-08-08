@@ -15,6 +15,24 @@
             return $"Đến {max.Value / 1000000} triệu";
         return "Thỏa thuận";
     }
+
+    public string ExtractLogoSrc(object? logoPath)
+    {
+        if (logoPath == null) return "";
+        string str = logoPath.ToString() ?? "";
+        if (string.IsNullOrWhiteSpace(str)) return "";
+        if (str.Contains("src='"))
+        {
+            var parts = str.Split("src='");
+            if (parts.Length > 1) return parts[1].Split("'")[0];
+        }
+        if (str.Contains("src=\""))
+        {
+            var parts = str.Split("src=\"");
+            if (parts.Length > 1) return parts[1].Split("\"")[0];
+        }
+        return str;
+    }
 }
 
 <!-- Page Header -->
@@ -102,8 +120,18 @@
                 
                 <!-- Company Card -->
                 <div class="card border-0 shadow-sm rounded-4 mb-4 text-center p-4">
-                    <div class="company-logo-large mx-auto mb-3 bg-light text-primary fw-bold d-flex align-items-center justify-content-center rounded-circle shadow-sm">
-                        @(string.IsNullOrEmpty(Model?.CompanyLogoPath) ? Model?.CompanyName.Substring(0,1).ToUpper() : $"<img src='{Model?.CompanyLogoPath}' alt='logo' class='img-fluid rounded-circle'>")
+                    @{
+                        var logoUrl = ExtractLogoSrc(Model?.CompanyLogoPath);
+                    }
+                    <div class="company-logo-large mx-auto mb-3 bg-light text-primary fw-bold d-flex align-items-center justify-content-center rounded-circle shadow-sm overflow-hidden" style="width:80px;height:80px;">
+                        @if (!string.IsNullOrEmpty(logoUrl))
+                        {
+                            <img src="@logoUrl" alt="@Model?.CompanyName" class="w-100 h-100 object-fit-cover">
+                        }
+                        else
+                        {
+                            <span class="fs-3">@(string.IsNullOrEmpty(Model?.CompanyName) ? "J" : Model.CompanyName.Substring(0,1).ToUpper())</span>
+                        }
                     </div>
                     <h5 class="fw-bold mb-2">@Model?.CompanyName</h5>
                     
